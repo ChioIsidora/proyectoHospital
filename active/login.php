@@ -1,25 +1,43 @@
 <?php
-
+#El script PHP está gestionando el envío del formulario de acceso.
 session_start();
-
+#session_start()`: Inicializa la sesión PHP.
 if($_POST){
-    include("./bd.php");
+    #Si la variable `$_POST` no está vacía 
+    #(es decir, el formulario ha sido enviado), procede a validar 
+    #las credenciales del usuario.
 
-    $sentencia=$conexion->prepare("SELECT *,count(*) as n_usuario 
+    include("./bd.php");
+    # Incluye el fichero `bd.php`, que presumiblemente contiene la lógica de 
+    #conexión a la base de datos.
+
+    
+    $sentencia=$conexion->prepare("SELECT *,count(*) as n_usuario
     FROM usuarios 
     WHERE rut=:rut 
     AND contrasena=:contrasena");
+
+    # Prepara una consulta SQL utilizando una sentencia preparada para seleccionar el registro 
+    #de usuario en función de la `rut` (nombre de usuario) y la `contrasena` 
+    #(contraseña) dadas.
     $rut=$_POST["rut"];
     $contrasena=$_POST["contrasena"];
+
+    #Vincula las variables `rut` y `contrasena` a los parámetros de 
+    #consulta «:rut» y «:contrasena», respectivamente.
 
     $sentencia->bindParam(":rut", $rut);
     $sentencia->bindParam(":contrasena", $contrasena);
 
     $sentencia->execute();
-
+    #Ejecuta la consulta.
     $registro=$sentencia->fetch(PDO::FETCH_LAZY);
+    #Obtiene la primera fila del resultado usando `fetch(PDO::FETCH_LAZY)`, 
+    #que devuelve un objeto con los nombres de las columnas como propiedades.
 
 if($registro["n_usuario"]>0){
+    # Comprueba si la propiedad `n_usuario` del objeto es mayor que 0, 
+    #indicando que se ha encontrado un registro coincidente.
     $_SESSION['rut']=$registro["rut"];
     $_SESSION['logeado']=true;
     header("Location:index.php");
@@ -27,11 +45,17 @@ if($registro["n_usuario"]>0){
     $mensaje="Error: El usuario o contraseña son incorrectos";
 
 }
+#Si se encuentra un registro coincidente:
+#Establece la propiedad `$_SESSION['rut']` al `rut` del usuario.
+#Establece `$_SESSION['logeado']` a `true` para indicar que el usuario ha iniciado sesión.
+#Redirige al usuario a la página `index.php` usando `header(«Location:index.php»)`.
 
+#Si no se encuentra ningún registro coincidente, muestra un mensaje de error 
+#almacenado en la variable `$mensaje`.
 }
 ?>
 
-
+<!-- El código HTML es la interfaz del formulario de login -->
 <!doctype html>
 <html lang="es">
     <head>
@@ -77,7 +101,8 @@ if($registro["n_usuario"]>0){
                     </div>
 
                     <?php }?>
-                    
+                    <!-- En la sección del cuerpo principal, 
+                    tiene un formulario con campos de entrada para `rut` y `contrasena`. -->
                     <form action="" method="post">
                         <div class="mb-3">
                             <label for="" class="form-label">Usuario:</label>
